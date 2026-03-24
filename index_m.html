@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="slides-format" content="viewport">
+    <title>Red, Blue & Purple Teams in the Real World</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <style type="text/tailwindcss">
+        @theme {
+            --color-bg: #050816;
+            --color-bg-deep: #020617;
+            --color-surface: #020617;
+            --color-text: #e5e7eb;
+            --color-text-secondary: #9ca3af;
+            --color-text-muted: #6b7280;
+            --color-accent-1: #22c55e;
+            --color-accent-2: #38bdf8;
+            --color-accent-3: #facc15;
+            --color-glass-bg: rgba(15,23,42,0.85);
+            --color-glass-border: rgba(148,163,184,0.45);
+            --color-vignette: rgba(0,0,0,0.6);
+            --font-display: 'JetBrains Mono', monospace;
+            --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+    </style>
+
+    <style>
+        :root { --color-bg: #050816; --color-text: #e5e7eb; --glow-color-rgb: 34,197,94; }
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { background: var(--color-bg); margin: 0; }
+        body {
+            font-family: var(--font-body, 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+            color: var(--color-text);
+            overflow: hidden;
+            height: 100dvh;
+            width: 100vw;
+        }
+        .deck { width: 100vw; height: 100dvh; position: relative; }
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100dvh;
+            background: radial-gradient(circle at top left, #0f172a 0, #020617 40%, #020617 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .slide.active { opacity: 1; transform: scale(1); pointer-events: all; }
+        .slide > .content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1100px;
+            padding: clamp(1.5rem, 4vw, 4rem);
+            padding-bottom: calc(clamp(1.5rem, 4vw, 4rem) + 4.8rem);
+        }
+        .nav-controls {
+            position: fixed;
+            bottom: max(14px, env(safe-area-inset-bottom, 0px) + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 100;
+            background: rgba(15,23,42,0.9);
+            backdrop-filter: blur(16px);
+            padding: 8px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(148,163,184,0.45);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+        }
+        .nav-btn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: radial-gradient(circle at 30% 0, rgba(34,197,94,0.35), rgba(15,23,42,0.9));
+            color: #bbf7d0;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            box-shadow: 0 0 16px rgba(34,197,94,0.4);
+        }
+        .nav-btn:hover {
+            background: radial-gradient(circle at 70% 100%, rgba(56,189,248,0.6), rgba(15,23,42,0.95));
+            transform: translateY(-1px);
+            box-shadow: 0 0 24px rgba(56,189,248,0.45);
+        }
+        .slide-dots { display: flex; gap: 6px; }
+        .slide-dots .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: rgba(148,163,184,0.6);
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            box-shadow: 0 0 0 rgba(34,197,94,0);
+        }
+        .slide-dots .dot.active {
+            background: #22c55e;
+            transform: scale(1.25);
+            box-shadow: 0 0 10px rgba(34,197,94,0.8);
+        }
+        .slide-counter {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            min-width: 52px;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .reveal { opacity: 0; transform: translateY(20px); }
+
+        @keyframes glow-pulse {
+            0%, 100% { text-shadow: 0 0 16px rgba(var(--glow-color-rgb), 0.6), 0 0 40px rgba(56,189,248,0.35); }
+            50% { text-shadow: 0 0 26px rgba(var(--glow-color-rgb), 0.9), 0 0 55px rgba(56,189,248,0.5); }
+        }
+        .text-glow { text-shadow: 0 0 18px rgba(var(--glow-color-rgb), 0.7), 0 0 40px rgba(56,189,248,0.45); }
+        .glow-pulse { animation: glow-pulse 3.3s ease-in-out infinite; }
+
+        @keyframes float-slow {
+            0% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(60px, -50px) scale(1.12); }
+            50% { transform: translate(-40px, 40px) scale(0.9); }
+            75% { transform: translate(50px, 20px) scale(1.08); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes float-drift {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(-50px, -60px) scale(1.15) rotate(3deg); }
+            66% { transform: translate(40px, 30px) scale(0.88) rotate(-2deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .gradient-mesh { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); animation: float-slow 16s ease-in-out infinite; }
+        .blob:nth-child(2) { animation: float-drift 22s ease-in-out infinite; }
+        .blob:nth-child(3) { animation: float-slow 18s ease-in-out infinite reverse; }
+
+        .slide::before {
+            content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            background-repeat: repeat; background-size: 256px 256px; opacity: 0.04; mix-blend-mode: soft-light;
+        }
+        .slide::after {
+            content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 52%, var(--color-vignette) 100%);
+        }
+
+        .bar-chart { display: flex; align-items: flex-end; gap: 0.75rem; height: 180px; }
+        .bar-col { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; }
+        .bar { border-radius: 6px 6px 0 0; width: 100%; background: linear-gradient(to top, #22c55e, #38bdf8); box-shadow: 0 0 18px rgba(34,197,94,0.55); }
+        .bar-label { font-size: 0.75rem; color: #9ca3af; font-family: 'JetBrains Mono', monospace; }
+
+        .mouse-spotlight { pointer-events: none; mix-blend-mode: screen; }
+
+        .card-glass {
+            background: radial-gradient(circle at top left, rgba(56,189,248,0.18), rgba(15,23,42,0.96));
+            border-radius: 1rem;
+            border: 1px solid rgba(148,163,184,0.5);
+            box-shadow: 0 18px 60px rgba(15,23,42,0.9);
+        }
+        .card-hover {
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 22px 80px rgba(15,23,42,1), 0 0 34px rgba(56,189,248,0.45);
+            border-color: rgba(56,189,248,0.9);
+        }
+        .terminal-tag {
+            border-radius: 9999px;
+            border: 1px solid rgba(148,163,184,0.6);
+            background: radial-gradient(circle at 0 0, rgba(34,197,94,0.22), rgba(15,23,42,0.95));
+            box-shadow: 0 0 18px rgba(34,197,94,0.45);
+        }
+
+        @media (max-width: 768px) {
+            .slide > .content {
+                max-width: 100%;
+                padding: 1.5rem 1.25rem;
+                padding-bottom: calc(1.5rem + 4.8rem);
+            }
+            h1 { font-size: 2.1rem !important; }
+            h2 { font-size: 1.6rem !important; }
+            pre { font-size: 0.75rem !important; }
+            .nav-controls { gap: 10px; padding: 6px 14px; }
+            .nav-btn { width: 30px; height: 30px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="mouse-spotlight" style="position:fixed;inset:0;z-index:99;"></div>
+
+<div class="deck">
+    <!-- Slide content identical to previous version, omitted here for brevity in generation script -->
+<div class="deck">
+    <!-- Slide 1: Title -->
+    <div class="slide slide-1 active" data-slide="1">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 520px; height: 520px; top: -120px; right: -80px; background: #22c55e; opacity: 0.18;"></div>
+            <div class="blob" style="width: 420px; height: 420px; bottom: -140px; left: -60px; background: #38bdf8; opacity: 0.22;"></div>
+            <div class="blob" style="width: 260px; height: 260px; top: 40%; left: 18%; background: #facc15; opacity: 0.14;"></div>
+        </div>
+        <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+        <div class="content text-center">
+            <div class="text-[120px] mb-6 animate-[float_3s_ease-in-out_infinite] drop-shadow-[0_0_35px_rgba(56,189,248,0.9)]">
+                🛡️
+            </div>
+            <h1 class="font-display text-[clamp(2.8rem,6vw,4.8rem)] font-extrabold bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent tracking-tight mb-4 reveal">
+                Red, Blue & Purple Teams
+            </h1>
+            <p class="text-[clamp(0.95rem,1.5vw,1.25rem)] font-medium text-text-secondary tracking-[0.35em] uppercase reveal">
+                Real-world security work, tools and career paths
+            </p>
+            <p class="mt-4 text-sm text-text-muted font-mono reveal">
+                Guest lecture with Robin Poudel &mdash; Security Engineer @ Cythera
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Meet your commander -->
+    <div class="slide slide-2" data-slide="2">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -60px; background: #38bdf8; opacity: 0.16;"></div>
+            <div class="blob" style="width: 320px; height: 320px; bottom: -120px; left: -80px; background: #22c55e; opacity: 0.14;"></div>
+        </div>
+        <div class="content">
+            <div class="flex flex-col md:flex-row gap-10 items-center">
+                <div class="flex-1">
+                    <span class="terminal-tag inline-flex items-center gap-2 px-4 py-1 text-xs uppercase tracking-[0.25em] text-emerald-300 mb-4 reveal">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        /init guest_lecture
+                    </span>
+                    <h2 class="font-display text-[clamp(2rem,4vw,2.8rem)] font-bold text-emerald-300 mb-3 reveal">
+                        Meet your commander
+                    </h2>
+                    <p class="text-text-secondary text-sm md:text-base mb-4 reveal">
+                        I am Robin &mdash; Security Engineer @ Cythera, Swinburne graduate, former international student
+                        and chronic researcher of random security rabbit holes.
+                    </p>
+                    <ul class="space-y-2 text-sm md:text-base text-text-muted list-disc list-inside reveal">
+                        <li>Day job: building and running detections in SIEM, EDR/XDR and cloud security tools.</li>
+                        <li>Past few years: SOC, MDR and incident response on attacks across industries.</li>
+                        <li>Today&apos;s mission: show you how this work really looks and how you can get there.</li>
+                    </ul>
+                </div>
+                <div class="flex-1 w-full">
+                    <div class="card-glass card-hover p-6 md:p-7 reveal">
+                        <h3 class="font-mono text-xs text-sky-300 tracking-[0.3em] uppercase mb-3">Loadout</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="text-text-secondary font-semibold mb-1">Specialties</p>
+                                <p class="text-text-muted">SOC operations, EDR/XDR, SIEM, email security, cloud security.</p>
+                            </div>
+                            <div>
+                                <p class="text-text-secondary font-semibold mb-1">Hobbies</p>
+                                <p class="text-text-muted">Cycling, travelling, classical music and over-analysing threat reports.</p>
+                            </div>
+                            <div>
+                                <p class="text-text-secondary font-semibold mb-1">Perspective</p>
+                                <p class="text-text-muted">Immigrant, ex-student &mdash; I was sitting where you are a few years ago.</p>
+                            </div>
+                            <div>
+                                <p class="text-text-secondary font-semibold mb-1">What you get</p>
+                                <p class="text-text-muted">Reality, not movie hacking; practical tools, not buzzword bingo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Disclaimer -->
+    <div class="slide slide-3" data-slide="3">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; left: -80px; background: #facc15; opacity: 0.12;"></div>
+            <div class="blob" style="width: 320px; height: 320px; bottom: -100px; right: -80px; background: #22c55e; opacity: 0.14;"></div>
+        </div>
+        <div class="content max-w-3xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Disclaimer & rules of engagement</h2>
+            <div class="space-y-4 text-sm md:text-base">
+                <p class="text-text-secondary reveal">
+                    This session is for <span class="text-emerald-300 font-semibold">education and career guidance</span> only &mdash;
+                    not for learning how to attack real organisations.
+                </p>
+                <ul class="space-y-2 text-text-muted list-disc list-inside reveal">
+                    <li>The views are my own and <span class="text-sky-300">do not represent</span> my employer.</li>
+                    <li>No confidential, proprietary or NDA-protected information will be shared.</li>
+                    <li>Anything we cover should be practised only in <span class="text-emerald-300">legal labs</span> (HTB, TryHackMe, home lab, etc.).</li>
+                </ul>
+                <p class="mt-4 text-xs md:text-sm text-text-muted font-mono reveal">
+                    TL;DR &mdash; Hack the box, not the uni Wi‑Fi.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Agenda -->
+    <div class="slide slide-4" data-slide="4">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #38bdf8; opacity: 0.18;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; left: -40px; background: #22c55e; opacity: 0.12;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.8rem)] font-bold text-emerald-300 mb-6 reveal">Today&apos;s mission</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card-glass card-hover p-5 reveal">
+                    <p class="font-mono text-xs text-sky-300 tracking-[0.25em] uppercase mb-2">Phase 1</p>
+                    <h3 class="font-semibold text-text-secondary mb-2">Know the teams</h3>
+                    <p class="text-sm text-text-muted">What Red, Blue and Purple teams actually do day to day.</p>
+                </div>
+                <div class="card-glass card-hover p-5 reveal">
+                    <p class="font-mono text-xs text-sky-300 tracking-[0.25em] uppercase mb-2">Phase 2</p>
+                    <h3 class="font-semibold text-text-secondary mb-2">See the tools</h3>
+                    <p class="text-sm text-text-muted">SIEM, EDR/XDR, pentest tools and real commands from the field.</p>
+                </div>
+                <div class="card-glass card-hover p-5 reveal">
+                    <p class="font-mono text-xs text-sky-300 tracking-[0.25em] uppercase mb-2">Phase 3</p>
+                    <h3 class="font-semibold text-text-secondary mb-2">Plan your path</h3>
+                    <p class="text-sm text-text-muted">Skills, labs, certs and interview signals that get you hired.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: First cyber role -->
+    <div class="slide slide-5" data-slide="5">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; left: -60px; background: #22c55e; opacity: 0.16;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; right: -40px; background: #38bdf8; opacity: 0.14;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <div class="md:flex md:items-start md:gap-10">
+                <div class="md:w-1/2">
+                    <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">My first cyber role: SOC triager</h2>
+                    <p class="text-text-secondary text-sm md:text-base mb-4 reveal">
+                        You&apos;ve got the certs and theory. Then Day 1 hits: a wall of alerts, new tools and
+                        decisions with real impact.
+                    </p>
+                    <ul class="space-y-2 text-sm md:text-base text-text-muted list-disc list-inside reveal">
+                        <li>Drowning in alerts from SIEM and XDR platforms.</li>
+                        <li>Googling error codes and Windows events you&apos;ve never seen.</li>
+                        <li>Writing tickets, chasing logs and asking &ldquo;Is this normal or suspicious?&rdquo;</li>
+                    </ul>
+                </div>
+                <div class="md:w-1/2 mt-6 md:mt-0">
+                    <div class="card-glass card-hover p-6 reveal">
+                        <h3 class="font-mono text-xs text-sky-300 tracking-[0.3em] uppercase mb-3">Reality check</h3>
+                        <p class="text-sm text-text-muted mb-4">
+                            The gap between university labs and a production SOC is <span class="text-emerald-300 font-semibold">culture shock</span>.
+                            That&apos;s normal. The goal is not to avoid it &mdash; it&apos;s to shorten it.
+                        </p>
+                        <p class="text-xs text-text-muted font-mono">
+                            Think about: if your first screen tomorrow was 200 new alerts, what
+                            would you look at first?
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Culture shock vs movies -->
+    <div class="slide slide-6" data-slide="6">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #facc15; opacity: 0.14;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; left: -40px; background: #38bdf8; opacity: 0.16;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-6 reveal">Culture shock: movies vs SOC</h2>
+            <div class="grid md:grid-cols-2 gap-6 text-sm md:text-base">
+                <div class="card-glass card-hover p-5 reveal">
+                    <h3 class="font-semibold text-text-secondary mb-2">What you expect</h3>
+                    <ul class="space-y-1 text-text-muted list-disc list-inside">
+                        <li>Terminal full of zero-days and instant shells.</li>
+                        <li>Chasing APTs across the globe on day one.</li>
+                        <li>Every day is a &ldquo;we&apos;re under attack&rdquo; war room.</li>
+                    </ul>
+                </div>
+                <div class="card-glass card-hover p-5 reveal">
+                    <h3 class="font-semibold text-text-secondary mb-2">What you actually see</h3>
+                    <ul class="space-y-1 text-text-muted list-disc list-inside">
+                        <li>Repeated failed logons, noisy scanners, weird scripts.</li>
+                        <li>Log gaps, misconfigured agents, false positives.</li>
+                        <li>Slow-burning incidents you piece together over days.</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="mt-4 text-xs text-text-muted font-mono reveal">
+                Good news: if you can handle this &ldquo;boring&rdquo; work with discipline, you&apos;re on track for the fun stuff.
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 7: Understanding the ranks -->
+    <div class="slide slide-7" data-slide="7">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #22c55e; opacity: 0.16;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; left: -40px; background: #38bdf8; opacity: 0.16;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.8rem)] font-bold text-emerald-300 mb-2 reveal">Understanding the ranks</h2>
+            <p class="text-sm md:text-base text-text-secondary mb-6 reveal">
+                Different roles, one mission: <span class="text-emerald-300 font-semibold">defend the organisation</span> from real attackers.
+            </p>
+            <div class="grid md:grid-cols-3 gap-5 text-sm">
+                <div class="card-glass card-hover p-5 reveal">
+                    <p class="font-mono text-xs text-rose-300 tracking-[0.25em] uppercase mb-1">Red team</p>
+                    <h3 class="font-semibold text-text-secondary mb-2">Attack like the enemy</h3>
+                    <p class="text-text-muted mb-2">Find real paths an attacker could use, prove impact, help fix.</p>
+                    <p class="text-xs text-text-muted font-mono">Tools: Nmap, Burp, BloodHound, C2 frameworks.</p>
+                </div>
+                <div class="card-glass card-hover p-5 reveal">
+                    <p class="font-mono text-xs text-sky-300 tracking-[0.25em] uppercase mb-1">Blue team</p>
+                    <h3 class="font-semibold text-text-secondary mb-2">Detect & respond</h3>
+                    <p class="text-text-muted mb-2">Monitor, hunt, contain incidents and improve detections.</p>
+                    <p class="text-xs text-text-muted font-mono">Tools: SIEM, EDR/XDR, email and cloud security.</p>
+                </div>
+                <div class="card-glass card-hover p-5 reveal">
+                    <p class="font-mono text-xs text-purple-300 tracking-[0.25em] uppercase mb-1">Purple team</p>
+                    <h3 class="font-semibold text-text-secondary mb-2">Make both better</h3>
+                    <p class="text-text-muted mb-2">Run structured attack–defend exercises and tune detections.</p>
+                    <p class="text-xs text-text-muted font-mono">Tools: MITRE ATT&CK, Atomic Red Team, custom scripts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Red team workflow & tools -->
+    <div class="slide slide-8" data-slide="8">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #f97316; opacity: 0.16;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; left: -40px; background: #22c55e; opacity: 0.12;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Red team: offence in the real world</h2>
+            <div class="grid md:grid-cols-2 gap-6 text-sm md:text-base">
+                <div class="space-y-2 reveal">
+                    <p class="text-text-secondary">Typical engagement flow:</p>
+                    <ol class="list-decimal list-inside space-y-1 text-text-muted">
+                        <li>Recon: map exposed assets and tech stack.</li>
+                        <li>Initial access: phishing, web vulns, credential abuse.</li>
+                        <li>Privilege & movement: AD abuse, misconfigurations.</li>
+                        <li>Impact & reporting: show business risk, not just &ldquo;got root&rdquo;.</li>
+                    </ol>
+                </div>
+                <div class="space-y-2 reveal">
+                    <p class="text-text-secondary">Tools mapped to phases:</p>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li><span class="text-emerald-300 font-semibold">Recon</span>: <span class="font-mono">nmap</span>, <span class="font-mono">amass</span>, <span class="font-mono">subfinder</span>.</li>
+                        <li><span class="text-emerald-300 font-semibold">Web</span>: Burp Suite, <span class="font-mono">ffuf</span>/<span class="font-mono">gobuster</span>, <span class="font-mono">sqlmap</span>.</li>
+                        <li><span class="text-emerald-300 font-semibold">AD</span>: BloodHound, <span class="font-mono">SharpHound</span>, password spraying tools.</li>
+                        <li><span class="text-emerald-300 font-semibold">Reporting</span>: structured findings with clear business impact and fixes.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Red commands snippet -->
+    <div class="slide slide-9" data-slide="9">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; left: -80px; background: #22c55e; opacity: 0.18;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; right: -40px; background: #38bdf8; opacity: 0.16;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Red team commands in the wild</h2>
+            <p class="text-sm md:text-base text-text-secondary mb-4 reveal">
+                A few commands you&apos;ll see in labs and entry-level pentest work (use only in legal environments).
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 text-xs md:text-sm font-mono">
+                <div class="card-glass card-hover p-4 space-y-2 reveal">
+                    <p class="text-sky-300 text-xs uppercase tracking-[0.25em]">Host & service discovery</p>
+                    <pre class="text-emerald-200 whitespace-pre-wrap">nmap -sC -sV -oA corp-scan 10.0.5.0/24</pre>
+                    <p class="text-text-muted">Runs default scripts, version detection and saves results. First step in many internal tests.</p>
+                </div>
+                <div class="card-glass card-hover p-4 space-y-2 reveal">
+                    <p class="text-sky-300 text-xs uppercase tracking-[0.25em]">Web content discovery</p>
+                    <pre class="text-emerald-200 whitespace-pre-wrap">ffuf -u https://target/FUZZ -w wordlist.txt -mc 200,403</pre>
+                    <p class="text-text-muted">Finds hidden paths like admin panels or APIs behind a single hostname.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Blue team responsibilities -->
+    <div class="slide slide-10" data-slide="10">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #38bdf8; opacity: 0.18;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; left: -40px; background: #22c55e; opacity: 0.14;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Blue team: defence in the real world</h2>
+            <div class="grid md:grid-cols-2 gap-6 text-sm md:text-base">
+                <div class="space-y-2 reveal">
+                    <p class="text-text-secondary">Typical day for a SOC / blue team analyst:</p>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li>Monitor SIEM / XDR alerts and triage what matters.</li>
+                        <li>Investigate suspicious logons, processes, network activity.</li>
+                        <li>Contain hosts, reset accounts, block indicators.</li>
+                        <li>Tune rules, close gaps and improve playbooks.</li>
+                    </ul>
+                </div>
+                <div class="space-y-2 reveal">
+                    <p class="text-text-secondary">Core tools you&apos;ll touch:</p>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li><span class="text-emerald-300 font-semibold">SIEM</span>: Sentinel, Splunk, QRadar &mdash; your log search brain.</li>
+                        <li><span class="text-emerald-300 font-semibold">EDR/XDR</span>: Defender, CrowdStrike, etc. &mdash; deep endpoint visibility and response.</li>
+                        <li><span class="text-emerald-300 font-semibold">Cloud & email</span>: CSPM tools, secure email gateways, identity protection.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Blue team commands -->
+    <div class="slide slide-11" data-slide="11">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; left: -80px; background: #22c55e; opacity: 0.18;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; right: -40px; background: #38bdf8; opacity: 0.16;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Blue team cheat sheet: host triage</h2>
+            <p class="text-sm md:text-base text-text-secondary mb-4 reveal">
+                A few commands that show up again and again when investigating endpoints.
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 text-xs md:text-sm font-mono">
+                <div class="card-glass card-hover p-4 space-y-2 reveal">
+                    <p class="text-sky-300 text-xs uppercase tracking-[0.25em]">Linux</p>
+                    <pre class="text-emerald-200 whitespace-pre-wrap">journalctl -u ssh.service --since "-1h"
+ss -tulpn | grep LISTEN
+tail -n 50 /var/log/auth.log</pre>
+                    <p class="text-text-muted">Recently seen SSH logins, listening services and auth failures.</p>
+                </div>
+                <div class="card-glass card-hover p-4 space-y-2 reveal">
+                    <p class="text-sky-300 text-xs uppercase tracking-[0.25em]">Windows (PowerShell)</p>
+                    <pre class="text-emerald-200 whitespace-pre-wrap">Get-WinEvent -LogName Security -MaxEvents 50
+Get-Process | Sort-Object CPU -Descending | Select -First 5
+netstat -ano | findstr ESTABLISHED</pre>
+                    <p class="text-text-muted">Recent security events, heavy processes and active connections.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: SIEM query example -->
+    <div class="slide slide-12" data-slide="12">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #38bdf8; opacity: 0.18;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; left: -40px; background: #22c55e; opacity: 0.14;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">SIEM in action: hunting noisy logons</h2>
+            <p class="text-sm md:text-base text-text-secondary mb-4 reveal">
+                Example of a KQL-style query to find accounts with many failed logons followed by a success.
+            </p>
+            <div class="card-glass card-hover p-5 text-xs md:text-sm font-mono space-y-3 reveal">
+<pre class="text-emerald-200 whitespace-pre-wrap">SecurityEvent
+| where EventID in (4625, 4624)
+| summarize Fails = countif(EventID == 4625),
+          Successes = countif(EventID == 4624),
+          LastSuccess = max(TimeGenerated)
+  by Account, IPAddress
+| where Fails &gt;= 10 and Successes &gt;= 1
+| sort by Fails desc</pre>
+                <p class="text-text-muted">
+                    This is the kind of thinking interviewers want: clear filters, aggregation, and a crisp hypothesis
+                    (&ldquo;brute force from a single IP&rdquo;), not just &ldquo;I know tool X.&rdquo;
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 13: Purple team -->
+    <div class="slide slide-13" data-slide="13">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #a855f7; opacity: 0.2;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; left: -40px; background: #22c55e; opacity: 0.14;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-purple-200 mb-4 reveal">Purple team & detection engineering</h2>
+            <p class="text-sm md:text-base text-text-secondary mb-4 reveal">
+                Purple is not a separate colour of hacker cloak. It&apos;s a <span class="text-purple-200 font-semibold">feedback loop</span>
+                where Red and Blue teams level each other up.
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 text-sm md:text-base">
+                <div class="reveal">
+                    <ol class="list-decimal list-inside text-text-muted space-y-1">
+                        <li>Pick a MITRE ATT&amp;CK technique (e.g. malicious PowerShell).</li>
+                        <li>Red simulates it safely in a lab or production window.</li>
+                        <li>Blue checks: did SIEM/XDR see it? Did an alert fire?</li>
+                        <li>If not, write or tune a detection; then re-test.</li>
+                    </ol>
+                </div>
+                <div class="reveal">
+                    <p class="text-text-secondary mb-2">Common purple tooling:</p>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li>MITRE ATT&amp;CK navigator for planning coverage.</li>
+                        <li>Atomic Red Team, Invoke-Atomic, Caldera for repeatable tests.</li>
+                        <li>Detection-as-code in SIEM / XDR for versioned rules.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 14: Pentest lifecycle & interview -->
+    <div class="slide slide-14" data-slide="14">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; left: -80px; background: #f97316; opacity: 0.18;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; right: -40px; background: #22c55e; opacity: 0.14;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Pentest lifecycle & interview mapping</h2>
+            <div class="grid md:grid-cols-2 gap-6 text-sm md:text-base">
+                <div class="reveal">
+                    <p class="text-text-secondary mb-2">Structured methodology employers listen for:</p>
+                    <ol class="list-decimal list-inside text-text-muted space-y-1">
+                        <li>Recon &amp; threat modelling.</li>
+                        <li>Scanning &amp; enumeration.</li>
+                        <li>Exploitation &amp; post-exploitation.</li>
+                        <li>Privilege escalation &amp; lateral movement.</li>
+                        <li>Reporting &amp; remediation guidance.</li>
+                    </ol>
+                </div>
+                <div class="reveal">
+                    <p class="text-text-secondary mb-2">How common questions map to that flow:</p>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li>&ldquo;Explain the pen testing methodology&rdquo; &rarr; can you walk this lifecycle clearly?</li>
+                        <li>&ldquo;Vuln scan vs pen test?&rdquo; &rarr; do you understand depth, validation and impact?</li>
+                        <li>&ldquo;Describe a time you breached a system&rdquo; &rarr; do you handle ethics and lessons learned?</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 15: Skills & labs -->
+    <div class="slide slide-15" data-slide="15">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #22c55e; opacity: 0.18;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; left: -40px; background: #38bdf8; opacity: 0.14;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Essential skills & labs for 2026</h2>
+            <div class="grid md:grid-cols-2 gap-6 text-sm md:text-base">
+                <div class="reveal">
+                    <p class="text-text-secondary mb-2">Technical foundations:</p>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li>Networking fundamentals: TCP/IP, DNS, HTTP, VPNs.</li>
+                        <li>Linux &amp; Windows administration and scripting.</li>
+                        <li>Cloud basics: IAM, network security groups, logging.</li>
+                    </ul>
+                    <p class="text-text-secondary mt-3 mb-1">Hands-on labs:</p>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li>Hack The Box, TryHackMe, CyberDefenders, home lab.</li>
+                    </ul>
+                </div>
+                <div class="reveal">
+                    <p class="text-text-secondary mb-2">Certifications (pick based on path):</p>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li>Entry: CompTIA Security+.</li>
+                        <li>Offence: eJPT, OSCP, GPEN.</li>
+                        <li>Defence: CySA+, SC-200, cloud security certs.</li>
+                        <li>Advanced: CISSP, OSEP, specialist GIAC tracks.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 16: Career paths & action plan -->
+    <div class="slide slide-16" data-slide="16">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 420px; height: 420px; top: -120px; left: -80px; background: #22c55e; opacity: 0.18;"></div>
+            <div class="blob" style="width: 260px; height: 260px; bottom: -80px; right: -40px; background: #38bdf8; opacity: 0.16;"></div>
+        </div>
+        <div class="content max-w-4xl">
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Choose your path & next steps</h2>
+            <p class="text-sm md:text-base text-text-secondary mb-4 reveal">
+                Most careers start in <span class="text-emerald-300 font-semibold">foundational roles</span> (SOC, junior analyst, helpdesk) and then
+                branch into Red, Blue, Purple, Cloud, DFIR and more.
+            </p>
+            <div class="grid md:grid-cols-3 gap-5 text-sm">
+                <div class="card-glass card-hover p-4 reveal">
+                    <h3 class="font-semibold text-text-secondary mb-2">Red‑curious</h3>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li>Finish HTB/THM beginner offensive paths.</li>
+                        <li>Document 3 labs like real pentest reports.</li>
+                        <li>Prepare to explain methodology in interviews.</li>
+                    </ul>
+                </div>
+                <div class="card-glass card-hover p-4 reveal">
+                    <h3 class="font-semibold text-text-secondary mb-2">Blue‑curious</h3>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li>Build a mini SIEM/XDR lab (Sysmon + free SIEM).</li>
+                        <li>Write 2–3 detections for common attacks.</li>
+                        <li>Practise explaining one investigation end‑to‑end.</li>
+                    </ul>
+                </div>
+                <div class="card-glass card-hover p-4 reveal">
+                    <h3 class="font-semibold text-text-secondary mb-2">Still exploring</h3>
+                    <ul class="list-disc list-inside text-text-muted space-y-1">
+                        <li>Strengthen networking, OS and scripting basics.</li>
+                        <li>Try both attack and defence labs to see what fits.</li>
+                        <li>Target one certification in the next 12 months.</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="mt-5 text-xs md:text-sm text-text-muted font-mono reveal">
+                Before you leave, write down one action you&apos;ll take in the next 7 days. That&apos;s where the journey starts.
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 17: Key takeaways & Q&A -->
+    <div class="slide slide-17" data-slide="17">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 520px; height: 520px; top: -140px; right: -80px; background: #22c55e; opacity: 0.2;"></div>
+            <div class="blob" style="width: 320px; height: 320px; bottom: -120px; left: -60px; background: #38bdf8; opacity: 0.18;"></div>
+            <div class="blob" style="width: 220px; height: 220px; top: 45%; left: 15%; background: #facc15; opacity: 0.14;"></div>
+        </div>
+        <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+        <div class="content max-w-4xl text-center">
+            <h2 class="font-display text-[clamp(2.2rem,4.8vw,3.2rem)] font-extrabold bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent mb-5 reveal">
+                Key takeaways &amp; questions
+            </h2>
+            <ul class="space-y-2 text-sm md:text-base text-text-secondary text-left md:text-center mx-auto max-w-2xl reveal">
+                <li>Red tests, Blue defends, Purple connects both &mdash; all are needed to secure real orgs.</li>
+                <li>Tools and commands are just force multipliers on top of strong fundamentals and thinking.</li>
+                <li>There are many paths in, and the industry demand is high if you put in consistent work.</li>
+            </ul>
+            <p class="mt-6 text-xs md:text-sm text-text-muted font-mono reveal">
+                Ask anything &mdash; careers, tools, labs, interviews. Your cybersecurity journey can start tonight.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="nav-controls">
+    <button class="nav-btn" onclick="changeSlide(-1)">&#8249;</button>
+    <div class="slide-dots" id="dots"></div>
+    <span class="slide-counter" id="counter">1 / 17</span>
+    <button class="nav-btn" onclick="changeSlide(1)">&#8250;</button>
+</div>
+
+<script>
+    let current = 1;
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    const dotsContainer = document.getElementById('dots');
+    const counter = document.getElementById('counter');
+
+    for (let i = 1; i <= total; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 1 ? ' active' : '');
+        dot.onclick = () => goToSlide(i);
+        dotsContainer.appendChild(dot);
+    }
+
+    function goToSlide(n) {
+        const prev = document.querySelector('.slide.active');
+        const next = document.querySelector(`.slide[data-slide="${n}"]`);
+        if (prev) prev.classList.remove('active');
+        if (next) { next.classList.add('active'); animateSlide(next); }
+        current = n; updateNav();
+    }
+
+    function changeSlide(dir) {
+        let next = current + dir;
+        if (next < 1) next = total;
+        if (next > total) next = 1;
+        goToSlide(next);
+    }
+
+    function updateNav() {
+        document.querySelectorAll('.dot').forEach((d, i) => {
+            d.classList.toggle('active', i + 1 === current);
+        });
+        counter.textContent = current + ' / ' + total;
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); }
+    });
+
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+    document.addEventListener('touchend', (e) => {
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1);
+    });
+
+    function animateSlide(slide) {
+        slide.querySelectorAll('.reveal').forEach((el, i) => {
+            el.style.transition = 'none';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            void el.offsetHeight;
+            const delay = i * 0.08;
+            el.style.transition = `opacity 0.35s ease ${delay}s, transform 0.35s ease ${delay}s`;
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0px)';
+        });
+    }
+
+    const spotlight = document.querySelector('.mouse-spotlight');
+    document.addEventListener('mousemove', (e) => {
+        if (spotlight) {
+            const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '56,189,248';
+            spotlight.style.background = `radial-gradient(550px circle at ${e.clientX}px ${e.clientY}px, rgba(${rgb}, 0.10), transparent 55%)`;
+        }
+    });
+
+    function initParticles(canvas, options) {
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        const interactive = options.interactive !== false;
+        const count = options.count || (interactive ? 55 : 22);
+        let mx = -1000, my = -1000;
+        const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '56,189,248';
+        const [r, g, b] = rgb.split(',').map(Number);
+        const particles = Array.from({ length: count }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            size: Math.random() * 2.5 + 0.8,
+            alpha: Math.random() * 0.35 + 0.1
+        }));
+        if (interactive) {
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mx = e.clientX - rect.left;
+                my = e.clientY - rect.top;
+            });
+            canvas.addEventListener('mouseleave', () => { mx = -1000; my = -1000; });
+        }
+        (function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                if (interactive) {
+                    const dx = p.x - mx;
+                    const dy = p.y - my;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    if (dist < 120) {
+                        const force = (120 - dist) / 120 * 2;
+                        p.vx += (dx / dist) * force * 0.12;
+                        p.vy += (dy / dist) * force * 0.12;
+                    }
+                }
+                p.vx *= 0.98;
+                p.vy *= 0.98;
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        })();
+    }
+
+    document.querySelectorAll('.particle-canvas').forEach(c => initParticles(c, { interactive: true, count: 55 }));
+    try { animateSlide(document.querySelector('.slide.active')); } catch (e) { console.warn('Initial animation error', e); }
+</script>
+
+</body>
+</html>
