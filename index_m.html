@@ -35,98 +35,18 @@
         :root { --color-bg: #050816; --color-text: #e5e7eb; --glow-color-rgb: 34,197,94; }
         *, *::before, *::after { box-sizing: border-box; }
         html, body { background: var(--color-bg); margin: 0; }
-        body {
-            font-family: var(--font-body, 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
-            color: var(--color-text);
-            overflow: hidden;
-            height: 100dvh;
-            width: 100vw;
-        }
-        .deck { width: 100vw; height: 100dvh; position: relative; }
-        .slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100dvh;
-            background: radial-gradient(circle at top left, #0f172a 0, #020617 40%, #020617 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transform: scale(0.95);
-            transition: opacity 0.7s ease, transform 0.7s ease;
-            pointer-events: none;
-            overflow: hidden;
-        }
+        body { font-family: var(--font-body, 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); color: var(--color-text); overflow: hidden; height: 100vh; width: 100vw; }
+        .deck { width: 100vw; height: 100vh; position: relative; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top left, #0f172a 0, #020617 40%, #020617 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); transition: opacity 0.7s ease, transform 0.7s ease; pointer-events: none; overflow: hidden; }
         .slide.active { opacity: 1; transform: scale(1); pointer-events: all; }
-        .slide > .content {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 1100px;
-            padding: clamp(1.5rem, 4vw, 4rem);
-            padding-bottom: calc(clamp(1.5rem, 4vw, 4rem) + 4.8rem);
-        }
-        .nav-controls {
-            position: fixed;
-            bottom: max(14px, env(safe-area-inset-bottom, 0px) + 8px);
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            z-index: 100;
-            background: rgba(15,23,42,0.9);
-            backdrop-filter: blur(16px);
-            padding: 8px 18px;
-            border-radius: 40px;
-            border: 1px solid rgba(148,163,184,0.45);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-        }
-        .nav-btn {
-            width: 34px;
-            height: 34px;
-            border: none;
-            background: radial-gradient(circle at 30% 0, rgba(34,197,94,0.35), rgba(15,23,42,0.9));
-            color: #bbf7d0;
-            border-radius: 50%;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
-            box-shadow: 0 0 16px rgba(34,197,94,0.4);
-        }
-        .nav-btn:hover {
-            background: radial-gradient(circle at 70% 100%, rgba(56,189,248,0.6), rgba(15,23,42,0.95));
-            transform: translateY(-1px);
-            box-shadow: 0 0 24px rgba(56,189,248,0.45);
-        }
-        .slide-dots { display: flex; gap: 6px; }
-        .slide-dots .dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            background: rgba(148,163,184,0.6);
-            cursor: pointer;
-            transition: background 0.3s, transform 0.3s;
-            box-shadow: 0 0 0 rgba(34,197,94,0);
-        }
-        .slide-dots .dot.active {
-            background: #22c55e;
-            transform: scale(1.25);
-            box-shadow: 0 0 10px rgba(34,197,94,0.8);
-        }
-        .slide-counter {
-            font-size: 0.75rem;
-            color: #9ca3af;
-            min-width: 52px;
-            text-align: right;
-            font-family: 'JetBrains Mono', monospace;
-        }
+        .slide > .content { position: relative; z-index: 2; width: 100%; max-width: 1100px; padding: clamp(1.5rem, 4vw, 4rem); }
+        .nav-controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; z-index: 100; background: rgba(15,23,42,0.9); backdrop-filter: blur(16px); padding: 10px 24px; border-radius: 40px; border: 1px solid rgba(148,163,184,0.45); box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+        .nav-btn { width: 40px; height: 40px; border: none; background: radial-gradient(circle at 30% 0, rgba(34,197,94,0.35), rgba(15,23,42,0.9)); color: #bbf7d0; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.3s, transform 0.2s, box-shadow 0.3s; box-shadow: 0 0 20px rgba(34,197,94,0.4); }
+        .nav-btn:hover { background: radial-gradient(circle at 70% 100%, rgba(56,189,248,0.6), rgba(15,23,42,0.95)); transform: translateY(-2px); box-shadow: 0 0 28px rgba(56,189,248,0.45); }
+        .slide-dots { display: flex; gap: 8px; }
+        .slide-dots .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(148,163,184,0.6); cursor: pointer; transition: background 0.3s, transform 0.3s; box-shadow: 0 0 0 rgba(34,197,94,0); }
+        .slide-dots .dot.active { background: #22c55e; transform: scale(1.35); box-shadow: 0 0 12px rgba(34,197,94,0.8); }
+        .slide-counter { font-size: 0.8rem; color: #9ca3af; min-width: 52px; text-align: right; font-family: 'JetBrains Mono', monospace; }
         .reveal { opacity: 0; transform: translateY(20px); }
 
         @keyframes glow-pulse {
@@ -185,7 +105,7 @@
             transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
         }
         .card-hover:hover {
-            transform: translateY(-4px);
+            transform: translateY(-6px);
             box-shadow: 0 22px 80px rgba(15,23,42,1), 0 0 34px rgba(56,189,248,0.45);
             border-color: rgba(56,189,248,0.9);
         }
@@ -195,22 +115,19 @@
             background: radial-gradient(circle at 0 0, rgba(34,197,94,0.22), rgba(15,23,42,0.95));
             box-shadow: 0 0 18px rgba(34,197,94,0.45);
         }
-
-        @media (max-width: 768px) {
-            .slide > .content {
-                max-width: 100%;
-                padding: 1.5rem 1.25rem;
-                padding-bottom: calc(1.5rem + 4.8rem);
-            }
-            h1 { font-size: 2.1rem !important; }
-            h2 { font-size: 1.6rem !important; }
-            pre { font-size: 0.75rem !important; }
-            .nav-controls { gap: 10px; padding: 6px 14px; }
-            .nav-btn { width: 30px; height: 30px; }
-        }
+        .particle-canvas { width: 100%; height: 100%; display: block; }
 
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+        }
+
+        /* Mobile tweaks */
+        @media (max-width: 768px) {
+            body { overflow-y: auto; overflow-x: hidden; height: 100vh; }
+            .deck { height: 100vh; }
+            .slide { overflow-y: auto; }
+            .slide > .content { padding: 1.25rem 1.25rem 5.5rem; }
+            .nav-controls { bottom: 10px; transform: translateX(-50%) scale(0.9); max-width: calc(100% - 2rem); padding-inline: 16px; }
         }
     </style>
 </head>
@@ -218,8 +135,6 @@
 
 <div class="mouse-spotlight" style="position:fixed;inset:0;z-index:99;"></div>
 
-<div class="deck">
-    <!-- Slide content identical to previous version, omitted here for brevity in generation script -->
 <div class="deck">
     <!-- Slide 1: Title -->
     <div class="slide slide-1 active" data-slide="1">
@@ -420,7 +335,7 @@
         </div>
     </div>
 
-    <!-- Slide 7: Understanding the ranks -->
+    <!-- Slide 7: Understanding the ranks (now clickable cards) -->
     <div class="slide slide-7" data-slide="7">
         <div class="gradient-mesh">
             <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #22c55e; opacity: 0.16;"></div>
@@ -429,27 +344,27 @@
         <div class="content max-w-4xl">
             <h2 class="font-display text-[clamp(2rem,4vw,2.8rem)] font-bold text-emerald-300 mb-2 reveal">Understanding the ranks</h2>
             <p class="text-sm md:text-base text-text-secondary mb-6 reveal">
-                Different roles, one mission: <span class="text-emerald-300 font-semibold">defend the organisation</span> from real attackers.
+                Tap a card to jump into that team&apos;s world.
             </p>
             <div class="grid md:grid-cols-3 gap-5 text-sm">
-                <div class="card-glass card-hover p-5 reveal">
+                <button type="button" onclick="goToSlide(8)" class="text-left card-glass card-hover p-5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 reveal">
                     <p class="font-mono text-xs text-rose-300 tracking-[0.25em] uppercase mb-1">Red team</p>
                     <h3 class="font-semibold text-text-secondary mb-2">Attack like the enemy</h3>
                     <p class="text-text-muted mb-2">Find real paths an attacker could use, prove impact, help fix.</p>
                     <p class="text-xs text-text-muted font-mono">Tools: Nmap, Burp, BloodHound, C2 frameworks.</p>
-                </div>
-                <div class="card-glass card-hover p-5 reveal">
+                </button>
+                <button type="button" onclick="goToSlide(10)" class="text-left card-glass card-hover p-5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 reveal">
                     <p class="font-mono text-xs text-sky-300 tracking-[0.25em] uppercase mb-1">Blue team</p>
                     <h3 class="font-semibold text-text-secondary mb-2">Detect & respond</h3>
                     <p class="text-text-muted mb-2">Monitor, hunt, contain incidents and improve detections.</p>
                     <p class="text-xs text-text-muted font-mono">Tools: SIEM, EDR/XDR, email and cloud security.</p>
-                </div>
-                <div class="card-glass card-hover p-5 reveal">
+                </button>
+                <button type="button" onclick="goToSlide(13)" class="text-left card-glass card-hover p-5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 reveal">
                     <p class="font-mono text-xs text-purple-300 tracking-[0.25em] uppercase mb-1">Purple team</p>
                     <h3 class="font-semibold text-text-secondary mb-2">Make both better</h3>
                     <p class="text-text-muted mb-2">Run structured attack–defend exercises and tune detections.</p>
                     <p class="text-xs text-text-muted font-mono">Tools: MITRE ATT&CK, Atomic Red Team, custom scripts.</p>
-                </div>
+                </button>
             </div>
         </div>
     </div>
@@ -468,8 +383,8 @@
                     <ol class="list-decimal list-inside space-y-1 text-text-muted">
                         <li>Recon: map exposed assets and tech stack.</li>
                         <li>Initial access: phishing, web vulns, credential abuse.</li>
-                        <li>Privilege & movement: AD abuse, misconfigurations.</li>
-                        <li>Impact & reporting: show business risk, not just &ldquo;got root&rdquo;.</li>
+                        <li>Privilege &amp; movement: AD abuse, misconfigurations.</li>
+                        <li>Impact &amp; reporting: show business risk, not just &ldquo;got root&rdquo;.</li>
                     </ol>
                 </div>
                 <div class="space-y-2 reveal">
@@ -498,7 +413,7 @@
             </p>
             <div class="grid md:grid-cols-2 gap-6 text-xs md:text-sm font-mono">
                 <div class="card-glass card-hover p-4 space-y-2 reveal">
-                    <p class="text-sky-300 text-xs uppercase tracking-[0.25em]">Host & service discovery</p>
+                    <p class="text-sky-300 text-xs uppercase tracking-[0.25em]">Host &amp; service discovery</p>
                     <pre class="text-emerald-200 whitespace-pre-wrap">nmap -sC -sV -oA corp-scan 10.0.5.0/24</pre>
                     <p class="text-text-muted">Runs default scripts, version detection and saves results. First step in many internal tests.</p>
                 </div>
@@ -534,7 +449,7 @@
                     <ul class="list-disc list-inside text-text-muted space-y-1">
                         <li><span class="text-emerald-300 font-semibold">SIEM</span>: Sentinel, Splunk, QRadar &mdash; your log search brain.</li>
                         <li><span class="text-emerald-300 font-semibold">EDR/XDR</span>: Defender, CrowdStrike, etc. &mdash; deep endpoint visibility and response.</li>
-                        <li><span class="text-emerald-300 font-semibold">Cloud & email</span>: CSPM tools, secure email gateways, identity protection.</li>
+                        <li><span class="text-emerald-300 font-semibold">Cloud &amp; email</span>: CSPM tools, secure email gateways, identity protection.</li>
                     </ul>
                 </div>
             </div>
@@ -837,27 +752,35 @@ netstat -ano | findstr ESTABLISHED</pre>
     document.addEventListener('mousemove', (e) => {
         if (spotlight) {
             const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '56,189,248';
-            spotlight.style.background = `radial-gradient(550px circle at ${e.clientX}px ${e.clientY}px, rgba(${rgb}, 0.10), transparent 55%)`;
+            spotlight.style.background = `radial-gradient(650px circle at ${e.clientX}px ${e.clientY}px, rgba(${rgb}, 0.12), transparent 55%)`;
         }
     });
 
     function initParticles(canvas, options) {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        const dpr = window.devicePixelRatio || 1;
+        const resize = () => {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        };
+        resize();
+        window.addEventListener('resize', resize);
+
         const interactive = options.interactive !== false;
-        const count = options.count || (interactive ? 55 : 22);
+        const count = options.count || (interactive ? 70 : 28);
         let mx = -1000, my = -1000;
         const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '56,189,248';
         const [r, g, b] = rgb.split(',').map(Number);
         const particles = Array.from({ length: count }, () => ({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 0.3,
-            vy: (Math.random() - 0.5) * 0.3,
-            size: Math.random() * 2.5 + 0.8,
-            alpha: Math.random() * 0.35 + 0.1
+            x: Math.random() * canvas.clientWidth,
+            y: Math.random() * canvas.clientHeight,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            size: Math.random() * 2.8 + 1.0,
+            alpha: Math.random() * 0.35 + 0.15
         }));
         if (interactive) {
             canvas.addEventListener('mousemove', (e) => {
@@ -868,26 +791,26 @@ netstat -ano | findstr ESTABLISHED</pre>
             canvas.addEventListener('mouseleave', () => { mx = -1000; my = -1000; });
         }
         (function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
             particles.forEach(p => {
                 if (interactive) {
                     const dx = p.x - mx;
                     const dy = p.y - my;
                     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    if (dist < 120) {
-                        const force = (120 - dist) / 120 * 2;
+                    if (dist < 160) {
+                        const force = (160 - dist) / 160 * 2.2;
                         p.vx += (dx / dist) * force * 0.12;
                         p.vy += (dy / dist) * force * 0.12;
                     }
                 }
-                p.vx *= 0.98;
-                p.vy *= 0.98;
+                p.vx *= 0.985;
+                p.vy *= 0.985;
                 p.x += p.vx;
                 p.y += p.vy;
-                if (p.x < 0) p.x = canvas.width;
-                if (p.x > canvas.width) p.x = 0;
-                if (p.y < 0) p.y = canvas.height;
-                if (p.y > canvas.height) p.y = 0;
+                if (p.x < 0) p.x = canvas.clientWidth;
+                if (p.x > canvas.clientWidth) p.x = 0;
+                if (p.y < 0) p.y = canvas.clientHeight;
+                if (p.y > canvas.clientHeight) p.y = 0;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha})`;
@@ -897,7 +820,7 @@ netstat -ano | findstr ESTABLISHED</pre>
         })();
     }
 
-    document.querySelectorAll('.particle-canvas').forEach(c => initParticles(c, { interactive: true, count: 55 }));
+    document.querySelectorAll('.particle-canvas').forEach(c => initParticles(c, { interactive: true, count: 70 }));
     try { animateSlide(document.querySelector('.slide.active')); } catch (e) { console.warn('Initial animation error', e); }
 </script>
 
