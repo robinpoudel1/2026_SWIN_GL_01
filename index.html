@@ -551,34 +551,38 @@ netstat -ano | findstr ESTABLISHED</pre>
         </div>
     </div>
 
-    <!-- Slide 14: Pentest lifecycle & interview -->
+    <!-- Slide 14: Interview signals -->
     <div class="slide slide-14" data-slide="14">
         <div class="gradient-mesh">
             <div class="blob" style="width: 420px; height: 420px; top: -120px; left: -80px; background: #f97316; opacity: 0.18;"></div>
             <div class="blob" style="width: 260px; height: 260px; bottom: -80px; right: -40px; background: #22c55e; opacity: 0.14;"></div>
         </div>
         <div class="content max-w-4xl">
-            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Pentest lifecycle & interview mapping</h2>
+            <h2 class="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold text-emerald-300 mb-4 reveal">Interview signals: Red, Blue and Purple</h2>
             <div class="grid md:grid-cols-2 gap-6 text-sm md:text-base">
                 <div class="reveal">
-                    <p class="text-text-secondary mb-2">Structured methodology employers listen for:</p>
+                    <p class="text-text-secondary mb-2">Offensive / penetration testing roles:</p>
+                    <p class="text-text-muted mb-2">Managers listen for a clear, safe process &mdash; not just tool names.</p>
                     <ol class="list-decimal list-inside text-text-muted space-y-1">
-                        <li>Recon &amp; threat modelling.</li>
-                        <li>Scanning &amp; enumeration.</li>
-                        <li>Exploitation &amp; post-exploitation.</li>
-                        <li>Privilege escalation &amp; lateral movement.</li>
-                        <li>Reporting &amp; remediation guidance.</li>
+                        <li>&ldquo;Explain your penetration testing methodology&rdquo; &rarr; can you walk through recon, scanning, exploitation, post-exploitation and reporting?</li>
+                        <li>&ldquo;What is the difference between a vulnerability scan and a penetration test?&rdquo; &rarr; do you understand depth, validation and business impact?</li>
+                        <li>&ldquo;Tell me about a time you gained access to a system in a test&rdquo; &rarr; do you talk about scope, safety and what you learnt, not just &ldquo;I got root&rdquo;?</li>
                     </ol>
                 </div>
                 <div class="reveal">
-                    <p class="text-text-secondary mb-2">How common questions map to that flow:</p>
+                    <p class="text-text-secondary mb-2">Defensive / Blue &amp; detection roles:</p>
+                    <p class="text-text-muted mb-2">Here they care about how you think when you see noisy, messy data.</p>
                     <ul class="list-disc list-inside text-text-muted space-y-1">
-                        <li>&ldquo;Explain the pen testing methodology&rdquo; &rarr; can you walk this lifecycle clearly?</li>
-                        <li>&ldquo;Vuln scan vs pen test?&rdquo; &rarr; do you understand depth, validation and impact?</li>
-                        <li>&ldquo;Describe a time you breached a system&rdquo; &rarr; do you handle ethics and lessons learned?</li>
+                        <li>&ldquo;Walk me through how you would triage an alert from an EDR or SIEM&rdquo; &rarr; do you check context (user, host, history), look for related events and decide whether to escalate?</li>
+                        <li>&ldquo;How would you investigate a suspected phishing email?&rdquo; &rarr; do you talk about headers, links, attachments, who else received it and what you would do next?</li>
+                        <li>&ldquo;Describe a time you investigated something that turned out to be a false positive&rdquo; &rarr; can you explain how you proved it was benign and how you would tune the rule?</li>
+                        <li>&ldquo;What logs or data sources do you find most useful when you suspect an account compromise?&rdquo; &rarr; sign-ins, MFA prompts, unusual locations/devices, endpoint events and so on.</li>
                     </ul>
                 </div>
             </div>
+            <p class="mt-4 text-xs md:text-sm text-text-muted font-mono reveal">
+                Whatever the role, show a clear process, explain your reasoning out loud and always link your answer back to risk for the organisation.
+            </p>
         </div>
     </div>
 
