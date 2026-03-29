@@ -660,8 +660,50 @@ netstat -ano | findstr ESTABLISHED</pre>
         </div>
     </div>
 
-    <!-- Slide 17: Key takeaways & Q&A -->
+        <!-- Slide 17: Encouragement & appreciation -->
     <div class="slide slide-17" data-slide="17">
+        <div class="gradient-mesh">
+            <div class="blob" style="width: 480px; height: 480px; top: -140px; left: -60px; background: #facc15; opacity: 0.18;"></div>
+            <div class="blob" style="width: 360px; height: 360px; bottom: -120px; right: -80px; background: #22c55e; opacity: 0.16;"></div>
+        </div>
+        <div class="content max-w-5xl">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="space-y-4 reveal">
+                    <div class="bg-bg-deep/80 border border-glass-border rounded-2xl p-6 md:p-8 shadow-xl">
+                        <p class="text-xs md:text-sm font-mono text-sky-300 tracking-[0.3em] uppercase mb-3">Well done getting this far</p>
+                        <h2 class="font-display text-[clamp(2.1rem,4.5vw,2.8rem)] font-bold text-emerald-200 mb-3">It&apos;s okay not to know everything</h2>
+                        <p class="text-sm md:text-base text-text-secondary">You showed up, you listened and you made it all the way to the end.</p>
+                        <div class="mt-3">
+                            <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExenEwaGZmOGVieHRqem5udGZvbHhqaHFoMjJqcGZzc2tkbzZyeWo0aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9Q249Qsl5cfLi/giphy.gif" alt="Friends patting each other on the back GIF" style="max-width:100%; max-height:260px; border-radius:0.75rem; object-fit:cover;">
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="space-y-4 text-sm md:text-base reveal">
+                    <div>
+                        <p class="text-text-secondary font-semibold mb-1">In cybersecurity (and life):</p>
+                        <ul class="list-disc list-inside text-text-muted space-y-1">
+                            <li>The landscape is constantly changing.</li>
+                            <li>No one knows every tool, technique or threat.</li>
+                            <li>Working together usually beats going it alone.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="text-text-secondary font-semibold mb-1">What matters more:</p>
+                        <ul class="list-disc list-inside text-text-muted space-y-1">
+                            <li>Willingness to ask questions.</li>
+                            <li>Openness to keep learning and trying new things.</li>
+                            <li>Courage to make mistakes, learn fast and grow.</li>
+                        </ul>
+                    </div>
+                    <p class="text-xs md:text-sm text-text-muted font-mono">Curiosity and humility will take you further in this field than certainty ever could.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Slide 18: Key takeaways & Q&A -->
+    <div class="slide slide-18" data-slide="18">
         <div class="gradient-mesh">
             <div class="blob" style="width: 520px; height: 520px; top: -140px; right: -80px; background: #22c55e; opacity: 0.2;"></div>
             <div class="blob" style="width: 320px; height: 320px; bottom: -120px; left: -60px; background: #38bdf8; opacity: 0.18;"></div>
@@ -687,7 +729,7 @@ netstat -ano | findstr ESTABLISHED</pre>
 <div class="nav-controls">
     <button class="nav-btn" onclick="changeSlide(-1)">&#8249;</button>
     <div class="slide-dots" id="dots"></div>
-    <span class="slide-counter" id="counter">1 / 17</span>
+    <span class="slide-counter" id="counter">1 / 18</span>
     <button class="nav-btn" onclick="changeSlide(1)">&#8250;</button>
 </div>
 
@@ -824,7 +866,7 @@ netstat -ano | findstr ESTABLISHED</pre>
         })();
     }
 
-    document.querySelectorAll('.particle-canvas').forEach(c => initParticles(c, { interactive: true, count: 150 }));
+    document.querySelectorAll('.particle-canvas').forEach(c => initParticles(c, { interactive: true, count: 70 }));
     try { animateSlide(document.querySelector('.slide.active')); } catch (e) { console.warn('Initial animation error', e); }
 </script>
 
