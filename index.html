@@ -95,23 +95,6 @@
 
         .mouse-spotlight { pointer-events: none; mix-blend-mode: screen; }
 
-        @media (max-width: 768px) {
-            body { font-size: 14px; }
-            .slide > .content { max-width: 100%; padding: 1.4rem; }
-            .nav-controls { bottom: 10px; padding: 6px 14px; gap: 10px; }
-            .nav-btn { width: 34px; height: 34px; font-size: 1rem; }
-            .slide-counter { font-size: 0.7rem; min-width: 46px; }
-        }
-        @media (max-width: 480px) {
-            .slide > .content { padding: 1.1rem; }
-            .card-glass { padding: 0.9rem !important; }
-            .mouse-spotlight { display: none; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
-        }
-
         .card-glass {
             background: radial-gradient(circle at top left, rgba(56,189,248,0.18), rgba(15,23,42,0.96));
             border-radius: 1rem;
@@ -131,6 +114,20 @@
             border: 1px solid rgba(148,163,184,0.6);
             background: radial-gradient(circle at 0 0, rgba(34,197,94,0.22), rgba(15,23,42,0.95));
             box-shadow: 0 0 18px rgba(34,197,94,0.45);
+        }
+        .particle-canvas { width: 100%; height: 100%; display: block; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+        }
+
+        /* Mobile tweaks */
+        @media (max-width: 768px) {
+            body { overflow-y: auto; overflow-x: hidden; height: 100vh; }
+            .deck { height: 100vh; }
+            .slide { overflow-y: auto; }
+            .slide > .content { padding: 1.25rem 1.25rem 5.5rem; }
+            .nav-controls { bottom: 10px; transform: translateX(-50%) scale(0.9); max-width: calc(100% - 2rem); padding-inline: 16px; }
         }
     </style>
 </head>
@@ -293,13 +290,14 @@
                     <div class="card-glass card-hover p-6 reveal">
                         <h3 class="font-mono text-xs text-sky-300 tracking-[0.3em] uppercase mb-3">Reality check</h3>
                         <p class="text-sm text-text-muted mb-4">
-                            The gap between university labs and a production SOC is <span class="text-emerald-300 font-semibold">culture shock</span>.
-                            That&apos;s normal. The goal is not to avoid it &mdash; it&apos;s to shorten it.
+                            The jump from university labs to a live SOC can feel overwhelming at first.
+                            That is completely normal &mdash; your only job is to get a bit more confident every week.
                         </p>
                         <p class="text-xs text-text-muted font-mono">
-                            Think about: if your first screen tomorrow was 200 new alerts, what
-                            would you look at first?
+                            If you logged in tomorrow and saw 200 alerts on your screen, what would you check first?
                         </p>
+                        <!-- Optional: drop a small GIF below and replace the src with your favourite SOC / alert GIF -->
+                        <!-- <img class="mt-3 rounded-lg max-h-32 object-cover" src="YOUR-GIF-URL-HERE" alt="SOC alert gif"> -->
                     </div>
                 </div>
             </div>
@@ -338,7 +336,7 @@
         </div>
     </div>
 
-    <!-- Slide 7: Understanding the ranks -->
+    <!-- Slide 7: Understanding the ranks (now clickable cards) -->
     <div class="slide slide-7" data-slide="7">
         <div class="gradient-mesh">
             <div class="blob" style="width: 420px; height: 420px; top: -120px; right: -80px; background: #22c55e; opacity: 0.16;"></div>
@@ -347,27 +345,27 @@
         <div class="content max-w-4xl">
             <h2 class="font-display text-[clamp(2rem,4vw,2.8rem)] font-bold text-emerald-300 mb-2 reveal">Understanding the ranks</h2>
             <p class="text-sm md:text-base text-text-secondary mb-6 reveal">
-                Different roles, one mission: <span class="text-emerald-300 font-semibold">defend the organisation</span> from real attackers.
+                Tap a card to jump into that team&apos;s world.
             </p>
             <div class="grid md:grid-cols-3 gap-5 text-sm">
-                <div class="card-glass card-hover p-5 reveal">
+                <button type="button" onclick="goToSlide(8)" class="text-left card-glass card-hover p-5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 reveal">
                     <p class="font-mono text-xs text-rose-300 tracking-[0.25em] uppercase mb-1">Red team</p>
                     <h3 class="font-semibold text-text-secondary mb-2">Attack like the enemy</h3>
                     <p class="text-text-muted mb-2">Find real paths an attacker could use, prove impact, help fix.</p>
                     <p class="text-xs text-text-muted font-mono">Tools: Nmap, Burp, BloodHound, C2 frameworks.</p>
-                </div>
-                <div class="card-glass card-hover p-5 reveal">
+                </button>
+                <button type="button" onclick="goToSlide(10)" class="text-left card-glass card-hover p-5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 reveal">
                     <p class="font-mono text-xs text-sky-300 tracking-[0.25em] uppercase mb-1">Blue team</p>
                     <h3 class="font-semibold text-text-secondary mb-2">Detect & respond</h3>
                     <p class="text-text-muted mb-2">Monitor, hunt, contain incidents and improve detections.</p>
                     <p class="text-xs text-text-muted font-mono">Tools: SIEM, EDR/XDR, email and cloud security.</p>
-                </div>
-                <div class="card-glass card-hover p-5 reveal">
+                </button>
+                <button type="button" onclick="goToSlide(13)" class="text-left card-glass card-hover p-5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 reveal">
                     <p class="font-mono text-xs text-purple-300 tracking-[0.25em] uppercase mb-1">Purple team</p>
                     <h3 class="font-semibold text-text-secondary mb-2">Make both better</h3>
                     <p class="text-text-muted mb-2">Run structured attack–defend exercises and tune detections.</p>
                     <p class="text-xs text-text-muted font-mono">Tools: MITRE ATT&CK, Atomic Red Team, custom scripts.</p>
-                </div>
+                </button>
             </div>
         </div>
     </div>
@@ -386,8 +384,8 @@
                     <ol class="list-decimal list-inside space-y-1 text-text-muted">
                         <li>Recon: map exposed assets and tech stack.</li>
                         <li>Initial access: phishing, web vulns, credential abuse.</li>
-                        <li>Privilege & movement: AD abuse, misconfigurations.</li>
-                        <li>Impact & reporting: show business risk, not just &ldquo;got root&rdquo;.</li>
+                        <li>Privilege &amp; movement: AD abuse, misconfigurations.</li>
+                        <li>Impact &amp; reporting: show business risk, not just &ldquo;got root&rdquo;.</li>
                     </ol>
                 </div>
                 <div class="space-y-2 reveal">
@@ -416,7 +414,7 @@
             </p>
             <div class="grid md:grid-cols-2 gap-6 text-xs md:text-sm font-mono">
                 <div class="card-glass card-hover p-4 space-y-2 reveal">
-                    <p class="text-sky-300 text-xs uppercase tracking-[0.25em]">Host & service discovery</p>
+                    <p class="text-sky-300 text-xs uppercase tracking-[0.25em]">Host &amp; service discovery</p>
                     <pre class="text-emerald-200 whitespace-pre-wrap">nmap -sC -sV -oA corp-scan 10.0.5.0/24</pre>
                     <p class="text-text-muted">Runs default scripts, version detection and saves results. First step in many internal tests.</p>
                 </div>
@@ -452,7 +450,7 @@
                     <ul class="list-disc list-inside text-text-muted space-y-1">
                         <li><span class="text-emerald-300 font-semibold">SIEM</span>: Sentinel, Splunk, QRadar &mdash; your log search brain.</li>
                         <li><span class="text-emerald-300 font-semibold">EDR/XDR</span>: Defender, CrowdStrike, etc. &mdash; deep endpoint visibility and response.</li>
-                        <li><span class="text-emerald-300 font-semibold">Cloud & email</span>: CSPM tools, secure email gateways, identity protection.</li>
+                        <li><span class="text-emerald-300 font-semibold">Cloud &amp; email</span>: CSPM tools, secure email gateways, identity protection.</li>
                     </ul>
                 </div>
             </div>
@@ -755,27 +753,35 @@ netstat -ano | findstr ESTABLISHED</pre>
     document.addEventListener('mousemove', (e) => {
         if (spotlight) {
             const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '56,189,248';
-            spotlight.style.background = `radial-gradient(550px circle at ${e.clientX}px ${e.clientY}px, rgba(${rgb}, 0.10), transparent 55%)`;
+            spotlight.style.background = `radial-gradient(650px circle at ${e.clientX}px ${e.clientY}px, rgba(${rgb}, 0.12), transparent 55%)`;
         }
     });
 
     function initParticles(canvas, options) {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        const dpr = window.devicePixelRatio || 1;
+        const resize = () => {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        };
+        resize();
+        window.addEventListener('resize', resize);
+
         const interactive = options.interactive !== false;
-        const count = options.count || (interactive ? 55 : 22);
+        const count = options.count || (interactive ? 70 : 28);
         let mx = -1000, my = -1000;
         const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '56,189,248';
         const [r, g, b] = rgb.split(',').map(Number);
         const particles = Array.from({ length: count }, () => ({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 0.3,
-            vy: (Math.random() - 0.5) * 0.3,
-            size: Math.random() * 2.5 + 0.8,
-            alpha: Math.random() * 0.35 + 0.1
+            x: Math.random() * canvas.clientWidth,
+            y: Math.random() * canvas.clientHeight,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            size: Math.random() * 2.8 + 1.0,
+            alpha: Math.random() * 0.35 + 0.15
         }));
         if (interactive) {
             canvas.addEventListener('mousemove', (e) => {
@@ -786,26 +792,26 @@ netstat -ano | findstr ESTABLISHED</pre>
             canvas.addEventListener('mouseleave', () => { mx = -1000; my = -1000; });
         }
         (function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
             particles.forEach(p => {
                 if (interactive) {
                     const dx = p.x - mx;
                     const dy = p.y - my;
                     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    if (dist < 120) {
-                        const force = (120 - dist) / 120 * 2;
+                    if (dist < 160) {
+                        const force = (160 - dist) / 160 * 2.2;
                         p.vx += (dx / dist) * force * 0.12;
                         p.vy += (dy / dist) * force * 0.12;
                     }
                 }
-                p.vx *= 0.98;
-                p.vy *= 0.98;
+                p.vx *= 0.985;
+                p.vy *= 0.985;
                 p.x += p.vx;
                 p.y += p.vy;
-                if (p.x < 0) p.x = canvas.width;
-                if (p.x > canvas.width) p.x = 0;
-                if (p.y < 0) p.y = canvas.height;
-                if (p.y > canvas.height) p.y = 0;
+                if (p.x < 0) p.x = canvas.clientWidth;
+                if (p.x > canvas.clientWidth) p.x = 0;
+                if (p.y < 0) p.y = canvas.clientHeight;
+                if (p.y > canvas.clientHeight) p.y = 0;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha})`;
@@ -815,7 +821,7 @@ netstat -ano | findstr ESTABLISHED</pre>
         })();
     }
 
-    document.querySelectorAll('.particle-canvas').forEach(c => initParticles(c, { interactive: true, count: 55 }));
+    document.querySelectorAll('.particle-canvas').forEach(c => initParticles(c, { interactive: true, count: 70 }));
     try { animateSlide(document.querySelector('.slide.active')); } catch (e) { console.warn('Initial animation error', e); }
 </script>
 
